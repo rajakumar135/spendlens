@@ -3,7 +3,7 @@
 > A production-quality full-stack expense tracker built for the Fenmo SDE Assessment.
 
 ## 🚀 Live Demo
-[https://your-app.vercel.app](https://your-app.vercel.app)
+[https://spendlens-amber.vercel.app/](https://spendlens-amber.vercel.app/)
 
 ## ✨ Features
 - Record expenses with amount, category, description, and date
