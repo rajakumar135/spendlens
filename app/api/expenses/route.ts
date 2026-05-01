@@ -4,6 +4,16 @@ import { expenseSchema } from '@/lib/validation';
 import { toPane, fromPane } from '@/lib/money';
 import crypto from 'crypto';
 
+interface ExpenseRow {
+  id: string;
+  idempotency_key: string;
+  amount_paise: number;
+  category: string;
+  description: string;
+  expense_date: string;
+  created_at: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -24,8 +34,7 @@ export async function POST(req: NextRequest) {
     const db = getDb();
 
     // Check idempotency key
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const existing = db.prepare('SELECT * FROM expenses WHERE idempotency_key = ?').get(idempotencyKey) as any;
+    const existing = db.prepare('SELECT * FROM expenses WHERE idempotency_key = ?').get(idempotencyKey) as ExpenseRow | undefined;
     
     if (existing) {
       return NextResponse.json({
@@ -49,8 +58,7 @@ export async function POST(req: NextRequest) {
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(newId, idempotencyKey, amountPaise, category, description, date);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const inserted = db.prepare('SELECT * FROM expenses WHERE id = ?').get(newId) as any;
+    const inserted = db.prepare('SELECT * FROM expenses WHERE id = ?').get(newId) as ExpenseRow;
 
     return NextResponse.json({
       id: inserted.id,
@@ -86,8 +94,7 @@ export async function GET(req: NextRequest) {
 
     query += ' ORDER BY expense_date DESC, created_at DESC';
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = db.prepare(query).all(...params) as any[];
+    const rows = db.prepare(query).all(...params) as ExpenseRow[];
 
     let totalRupees = 0;
     const expenses = rows.map(row => {
